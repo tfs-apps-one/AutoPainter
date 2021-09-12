@@ -36,13 +36,25 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
         drawing = false;
     }
 
-    public void createObject(Canvas canvas){
+    public void createObject(Canvas canvas, long timer){
         float xc = getWidth();
         float yc = getHeight();
         int type;
-        type = rand.nextInt(1000);
-        type = type % 6;
+        int i;
 
+        /* 図形の出現率 */
+        while (true) {
+            type = rand.nextInt(1000);
+            type = type % 7;
+            if (type == 6){ //星型だけ確率を下げる
+                if ((timer%5) == 0){
+                    break;
+                }
+            }
+            else{
+                break;
+            }
+        }
         paint = new Paint();
 
         float x = rand.nextInt((int) xc);
@@ -54,7 +66,7 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
         int color_4 = rand.nextInt(255);
         int dp = rand.nextInt(3);
         int stroke = rand.nextInt(8);
-        int scale = rand.nextInt(20);
+        int scale = rand.nextInt((int)xc/30);
 //        int scale = rand.nextInt((int)xc/3);
 
         PaintData paintData = new PaintData(paint,xc,yc,x,y,dp);
@@ -76,7 +88,7 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
         if (drawing == false){
             return;
         }
-        createObject(canvas);
+        createObject(canvas, timer);
         for (int i = 0; i < paintList.size(); i++) {
             PaintData object = paintList.get(i);
             int s_x = rand.nextInt(100) + 1;    //  X軸の移動ベクトル（ +方向<50 -方向>50)

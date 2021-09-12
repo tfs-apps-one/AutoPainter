@@ -75,7 +75,7 @@ public class PaintData extends PaintParts {
             }
             else{
                 scale--;
-                if(scale < 1)  scale = 1;
+                if(scale < 3)  scale = 3;
             }
         }
 
