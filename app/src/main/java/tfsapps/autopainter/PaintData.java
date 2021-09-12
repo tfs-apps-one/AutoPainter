@@ -3,6 +3,8 @@ package tfsapps.autopainter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.PointF;
 
 public class PaintData extends PaintParts {
     private float screen_x;
@@ -24,6 +26,8 @@ public class PaintData extends PaintParts {
     private int sign_y = 0;
     private int move_x = 0;
     private int move_y = 0;
+
+    private int sign_scale = 0;
 
 
     public PaintData(Paint data,
@@ -51,17 +55,29 @@ public class PaintData extends PaintParts {
         type = ty;
     }
 
-    public void move(int s_x, int mv_x, int s_y, int mv_y){
-        if (sign_x == 0)    sign_x = s_x;
-        if (move_x == 0)    move_x = mv_x;
-        if (sign_y == 0)    sign_y = s_y;
-        if (move_y == 0)    move_y = mv_y;
+    public void move(int s_x, int mv_x, int s_y, int mv_y, int s_s, boolean s_flag){
+        if (sign_x == 0)            sign_x = s_x;
+        if (move_x == 0)            move_x = mv_x;
+        if (sign_y == 0)            sign_y = s_y;
+        if (move_y == 0)            move_y = mv_y;
+        if (sign_scale == 0)        sign_scale = s_s;
 
-        if (sign_x < 50)      x += mv_x;
-        else                  x -= mv_x;
-
-        if (sign_y < 50)      y += mv_y;
-        else                  y -= mv_y;
+        //  X軸の移動
+        if (sign_x < 50)            x += mv_x;
+        else                        x -= mv_x;
+        //  y軸の移動
+        if (sign_y < 50)            y += mv_y;
+        else                        y -= mv_y;
+        //  図形の大きさ
+        if (s_flag == true){
+            if (sign_scale < 50){
+                scale++;
+            }
+            else{
+                scale--;
+                if(scale < 1)  scale = 1;
+            }
+        }
 
     }
 
@@ -114,12 +130,26 @@ public class PaintData extends PaintParts {
                         x + 120 * dp, y + 100 * dp, paint);*/
                 break;
 
-            //  線
+            //  星型
             case 4:
-                paint.setStrokeWidth(stroke);
+                Path path = new Path();
                 paint.setColor(Color.argb(color1, color2, color3, color4));
-                // (x1,y1,x2,y2,paint) 始点の座標(x1,y1), 終点の座標(x2,y2)
-                canvas.drawLine(x + 20 * dp, y - 30 * dp, x - 70 * dp, y + 70 * dp, paint);
+                paint.setStyle(Paint.Style.FILL_AND_STROKE);
+                path.reset();
+                float theta = (float)(Math.PI * 72 / 180);
+                float r = (float)scale;
+                PointF center = new PointF(x, y);
+                float dx1 = (float)(r*Math.sin(theta));
+                float dx2 = (float)(r*Math.sin(2*theta));
+                float dy1 = (float)(r*Math.cos(theta));
+                float dy2 = (float)(r*Math.cos(2*theta));
+                path.moveTo(center.x, center.y-r);
+                path.lineTo(center.x-dx2, center.y-dy2);
+                path.lineTo(center.x+dx1, center.y-dy1);
+                path.lineTo(center.x-dx1, center.y-dy1);
+                path.lineTo(center.x+dx2, center.y-dy2);
+                path.lineTo(center.x, center.y-r);
+                canvas.drawPath(path, paint);
                 break;
         }
     }
