@@ -41,7 +41,7 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
         float yc = getHeight();
         int type;
         type = rand.nextInt(1000);
-        type = type % 5;
+        type = type % 6;
 
         paint = new Paint();
 
@@ -70,8 +70,8 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
         // 背景
         //白で影なし
 //        canvas.drawColor(Color.argb(255, 255, 255, 255));
-        //白で影なし
-        canvas.drawColor(Color.argb(230, 255, 255, 255));
+        //白で影あり
+        canvas.drawColor(Color.argb(210, 255, 255, 255));
 
         if (drawing == false){
             return;

@@ -95,11 +95,12 @@ public class PaintData extends PaintParts {
                 canvas.drawCircle(x - dp, y - dp, scale, paint);
 //                canvas.drawCircle(x - 15 * dp, y - 55 * dp, scale, paint);
                 break;
-            // 円
+            // 円    塗りつぶし
             case 1:
                 paint.setColor(Color.argb(color1, color2, color3, color4));
                 paint.setAntiAlias(true);
-                paint.setStyle(Paint.Style.STROKE);
+//                paint.setStrokeWidth(0);
+//                paint.setStyle(Paint.Style.STROKE);
                 // (x1,y1,r,paint) 中心x1座標, 中心y1座標, r半径
                 canvas.drawCircle(x - dp, y - dp, scale, paint);
 //                canvas.drawCircle(x - 15 * dp, y - 55 * dp, scale, paint);
@@ -119,7 +120,7 @@ public class PaintData extends PaintParts {
                         x + 120 * dp, y + 100 * dp, paint);*/
                 break;
 
-            // 矩形
+            // 矩形    塗りつぶし
             case 3:
                 // 矩形
                 paint.setColor(Color.argb(color1, color2, color3, color4));
@@ -132,6 +133,32 @@ public class PaintData extends PaintParts {
 
             //  星型
             case 4:
+                Path path3 = new Path();
+                paint.setColor(Color.argb(color1, color2, color3, color4));
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setStrokeWidth(stroke);
+                int width2 = (3*scale);
+                path3.moveTo(x+width2, y+(width2/3));
+                path3.lineTo(x+width2-(width2/3),y+width2);
+                path3.lineTo(x+width2+(width2/3),y+width2);
+                path3.close();
+                canvas.drawPath(path3,paint);
+                break;
+
+            //  星型      塗りつぶし
+            case 5:
+                Path path2 = new Path();
+                paint.setColor(Color.argb(color1, color2, color3, color4));
+                paint.setStyle(Paint.Style.FILL);
+                int width = (3*scale);
+                path2.moveTo(x+width, y+(width/3));
+                path2.lineTo(x+width-(width/3),y+width);
+                path2.lineTo(x+width+(width/3),y+width);
+                canvas.drawPath(path2,paint);
+                break;
+
+            //  星型
+            case 6:
                 Path path = new Path();
                 paint.setColor(Color.argb(color1, color2, color3, color4));
                 paint.setStyle(Paint.Style.FILL_AND_STROKE);
