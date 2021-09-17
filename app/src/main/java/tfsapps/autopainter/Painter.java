@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -19,16 +20,34 @@ import androidx.annotation.NonNull;
 
 public class Painter extends SurfaceView implements SurfaceHolder.Callback {
     Paint paint;
-    float dp = 2;
+    Paint title;
+    Paint score;
+    private long time_count;
+    private int game_stage = 1;
+    private int draw_num = 0;
+    private int star_num = 0;
     boolean drawing = true;
     private static final long FPS = 60;
     private final Random rand = new Random(System.currentTimeMillis());
     private final List<PaintData> paintList = new ArrayList<PaintData>();
 
+    private final int GAME_OPEING = 1;      //ステージの表示　中央に大きく
+    private final int GAME_SETTING = 2;     //ゲーム準備中
+    private final int GAME_PLAYING = 3;     //ゲームプレイ中
+    private final int GAME_ENDING = 4;      //ゲーム終了中
+
+    private int game_status = 0;
+
     public Painter(Context context) {
         super(context);
         getHolder().addCallback(this);
+
+        /* スコア表示（図形の数）の生成 */
+        title = new Paint();
+        /* スコア表示（図形の数）の生成 */
+        score = new Paint();
     }
+
     public void StartDrawing(){
         drawing = true;
     }
@@ -36,12 +55,22 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
         drawing = false;
     }
 
+    /********************************************************************************
+     図形生成の処理
+     *********************************************************************************/
     public void createObject(Canvas canvas, long timer){
         float xc = getWidth();
         float yc = getHeight();
         int type;
         int i;
 
+        //test  出現率調整　ゲームバランス
+/*        int rate = 10;
+        rate = rate - game_stage;
+        if ((timer%rate) != 0){
+            return;
+        }
+*/
         /* 図形の出現率 */
         while (true) {
             type = rand.nextInt(1000);
@@ -65,7 +94,9 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
         int color_3 = rand.nextInt(255);
         int color_4 = rand.nextInt(255);
         int dp = rand.nextInt(3);
-        int stroke = rand.nextInt(8);
+//        int stroke = rand.nextInt(8);
+        int stroke = rand.nextInt(15);
+        if (stroke <=5) stroke=5;
         int scale = rand.nextInt((int)xc/30);
 //        int scale = rand.nextInt((int)xc/3);
 
@@ -79,16 +110,68 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
     *********************************************************************************/
     protected void drawObject(Canvas canvas,long timer) {
 
-        // 背景
-        //白で影なし
-//        canvas.drawColor(Color.argb(255, 255, 255, 255));
-        //白で影あり
-        canvas.drawColor(Color.argb(210, 255, 255, 255));
+        /* 背景 */
+        canvas.drawColor(Color.argb(220, 255, 255, 255));   //白で影あり
+//        canvas.drawColor(Color.argb(255, 255, 255, 255)); //白で影なし
 
-        if (drawing == false){
+        /* アプリ起動直後 */
+        if (game_status == 0)   game_status = GAME_OPEING;
+
+        /* ゲームエンディング */
+        if (game_status == GAME_ENDING){
+            title.setColor(Color.BLACK);
+            title.setTextSize(70);
+            title.setTypeface(Typeface.DEFAULT_BOLD);
+            title.setAntiAlias(true);
+            canvas.drawText("☆★ ステージ:" + game_stage + " クリア ★☆", 50, 150, title);
+
+            /* オブジェクト全て消去 */
+            for (int i = 0; i < paintList.size(); i++) {
+                PaintData object = paintList.get(i);
+                paintList.remove(object);
+            }
+
+            if ((timer % 100) == 0){
+                game_status = GAME_OPEING;
+                game_stage++;
+                time_count = 0;
+            }
             return;
         }
+
+
+        /* ゲームオープニング */
+        if (game_status == GAME_OPEING){
+            title.setColor(Color.BLACK);
+            title.setTextSize(70);
+            title.setTypeface(Typeface.DEFAULT_BOLD);
+            title.setAntiAlias(true);
+            canvas.drawText("ステージ: " + game_stage + " 準備中...", 50, 150, title);
+
+            if (timer > 70){
+                game_status = GAME_SETTING;
+            }
+            return;
+        }
+        /* ゲーム準備中 */
+        if (game_status == GAME_SETTING){
+            title.setColor(Color.BLACK);
+            title.setTextSize(70);
+            title.setTypeface(Typeface.DEFAULT_BOLD);
+            title.setAntiAlias(true);
+            canvas.drawText("ステージ: " + game_stage + " スタート！", 50, 150, title);
+
+            if (timer > 120){
+                game_status = GAME_PLAYING;
+            }
+        }
+
+        star_num = 0;
+
+        /* 図形の生成 */
         createObject(canvas, timer);
+
+        /* 図形の表示 */
         for (int i = 0; i < paintList.size(); i++) {
             PaintData object = paintList.get(i);
             int s_x = rand.nextInt(100) + 1;    //  X軸の移動ベクトル（ +方向<50 -方向>50)
@@ -105,10 +188,45 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
             else{
                 scale_flag = false;
             }
-
+            /* 図形の移動 */
             object.move(s_x,m_x,s_y,m_y,s_s,scale_flag);
 //            invalidate();
+            /* 図形の表示 */
             object.draw(canvas);
+        }
+
+        /* 不要図形の消去 */
+        for (int i = 0; i < paintList.size(); i++) {
+            PaintData object = paintList.get(i);
+            if (object.isObjAlive() == false){
+                paintList.remove(object);
+            }
+            else {
+                if (object.isStar() == true){
+                    star_num++;
+                }
+            }
+        }
+
+
+        /* スコアの表示 */
+        if (game_status == GAME_PLAYING) {
+            title.setColor(Color.BLUE);
+            title.setTextSize(45);
+            title.setTypeface(Typeface.DEFAULT_BOLD);
+            title.setAntiAlias(true);
+            canvas.drawText("ほし★をタッチしてゼロ個にしよう！！", 50, 50, title);
+
+            score.setColor(Color.RED);
+            score.setTextSize(60);
+            score.setTypeface(Typeface.DEFAULT_BOLD);
+            score.setAntiAlias(true);
+            canvas.drawText("ステージ:" + game_stage + "　★ 残り:" + star_num + "個", 50, 120, score);
+
+            /* 星がゼロ個になった場合 */
+            if (star_num <= 0){
+                game_status = GAME_ENDING;
+            }
         }
     }
 
@@ -120,6 +238,16 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 Log.v("TAP>>>","xPos=" + event.getX() + ", yPos="+ event.getY());
+
+                /* ゲームプレイ中のみ */
+                if (game_status == GAME_PLAYING) {
+                    for (int i = 0; i < paintList.size(); i++) {
+                        PaintData object = paintList.get(i);
+                        if (object.isObjHit(event.getX(), event.getY()) == true) {
+                        }
+                    }
+                }
+
                 break;
         }
         return super.onTouchEvent(event);
@@ -130,7 +258,6 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
      *********************************************************************************/
     private class DrawThread extends Thread {
         private boolean isFinished;
-        private long time_count;
         @Override
         public void run() {
             super.run();

@@ -29,7 +29,9 @@ public class PaintData extends PaintParts {
 
     private int sign_scale = 0;
 
+    private boolean isAlive = false;
 
+    /* オブジェクトの生成（インスタンス） */
     public PaintData(Paint data,
                      float sc_x,
                      float sc_y,
@@ -43,8 +45,45 @@ public class PaintData extends PaintParts {
         x = obj_x;
         y = obj_y;
         dp = obj_dp;
+        isAlive = true;
     }
 
+    /* スターのヒット判定 */
+    public boolean isObjHit(float tap_x, float tap_y){
+
+        float r = (float)scale;
+        PointF center = new PointF(x, y);
+
+        /* 星であるか？ */
+        if (type != STAR){
+            return false;
+        }
+        /* 星の場合 */
+        else{
+            /* ヒット判定ON */
+            if ((tap_x > x-scale) && (tap_x < x + scale + scale) &&
+                    (tap_y > y-scale-scale) && (tap_y < y +scale)){
+                isAlive = false;
+//                paint.setColor(Color.argb(0, 0, 0, 0));
+                return true;
+            }
+
+        }
+        return false;
+    }
+
+    /* オブジェクトが星であるか？ */
+    public boolean isStar(){
+        if(type == STAR)    return true;
+        else                return false;
+    }
+
+    /* オブジェクトの生死 */
+    public boolean isObjAlive(){
+        return isAlive;
+    }
+
+    /* オブジェクトの設定値 */
     public void PaintDataSetParam(int c1,int c2,int c3,int c4, int sc, int st, int ty) {
         color1 = c1;
         color2 = c2;
@@ -55,6 +94,7 @@ public class PaintData extends PaintParts {
         type = ty;
     }
 
+    /* オブジェクトの移動 */
     public void move(int s_x, int mv_x, int s_y, int mv_y, int s_s, boolean s_flag){
         if (sign_x == 0)            sign_x = s_x;
         if (move_x == 0)            move_x = mv_x;
@@ -79,6 +119,13 @@ public class PaintData extends PaintParts {
             }
         }
 
+        /* 画面範囲外 */
+        if (x < -10 )               isAlive = false;
+        if (x > screen_x + 10)      isAlive = false;
+//        if (y < -10)                isAlive = false;
+        if (y < 100)                isAlive = false;
+        if (y > screen_y + 10)      isAlive = false;
+
     }
 
     @Override
@@ -86,7 +133,7 @@ public class PaintData extends PaintParts {
         /* ここでタイプ表示？？ */
         switch (type) {
             // 円
-            case 0:
+            case CIRCLE_0:
                 paint.setColor(Color.argb(color1, color2, color3, color4));
                 paint.setStrokeWidth(stroke);
                 paint.setAntiAlias(true);
@@ -96,7 +143,7 @@ public class PaintData extends PaintParts {
 //                canvas.drawCircle(x - 15 * dp, y - 55 * dp, scale, paint);
                 break;
             // 円    塗りつぶし
-            case 1:
+            case CIRCLE_1:
                 paint.setColor(Color.argb(color1, color2, color3, color4));
                 paint.setAntiAlias(true);
 //                paint.setStrokeWidth(0);
@@ -107,7 +154,7 @@ public class PaintData extends PaintParts {
                 break;
 
             // 矩形
-            case 2:
+            case SQUARE_0:
                 // 矩形
                 paint.setColor(Color.argb(color1, color2, color3, color4));
                 paint.setStrokeWidth(stroke);
@@ -121,7 +168,7 @@ public class PaintData extends PaintParts {
                 break;
 
             // 矩形    塗りつぶし
-            case 3:
+            case SQUARE_1:
                 // 矩形
                 paint.setColor(Color.argb(color1, color2, color3, color4));
                 // (x1,y1,x2,y2,paint) 左上の座標(x1,y1), 右下の座標(x2,y2)
@@ -131,8 +178,8 @@ public class PaintData extends PaintParts {
                         x + 120 * dp, y + 100 * dp, paint);*/
                 break;
 
-            //  星型
-            case 4:
+            //  三角
+            case TRIANGLE_0:
                 Path path3 = new Path();
                 paint.setColor(Color.argb(color1, color2, color3, color4));
                 paint.setStyle(Paint.Style.STROKE);
@@ -145,8 +192,8 @@ public class PaintData extends PaintParts {
                 canvas.drawPath(path3,paint);
                 break;
 
-            //  星型      塗りつぶし
-            case 5:
+            //  三角      塗りつぶし
+            case TRIANGLE_1:
                 Path path2 = new Path();
                 paint.setColor(Color.argb(color1, color2, color3, color4));
                 paint.setStyle(Paint.Style.FILL);
@@ -158,7 +205,8 @@ public class PaintData extends PaintParts {
                 break;
 
             //  星型
-            case 6:
+            case STAR:
+                scale = 60;
                 Path path = new Path();
                 paint.setColor(Color.argb(color1, color2, color3, color4));
                 paint.setStyle(Paint.Style.FILL_AND_STROKE);
