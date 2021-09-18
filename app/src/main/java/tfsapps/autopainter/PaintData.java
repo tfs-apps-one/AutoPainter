@@ -28,8 +28,8 @@ public class PaintData extends PaintParts {
     private int move_y = 0;
 
     private int sign_scale = 0;
-
     private boolean isAlive = false;
+    public int hitpoint = 20;
 
     /* オブジェクトの生成（インスタンス） */
     public PaintData(Paint data,
@@ -83,6 +83,11 @@ public class PaintData extends PaintParts {
         return isAlive;
     }
 
+    /* オブジェクトのヒットポイント */
+    public int isObjHitPoint(){
+        return hitpoint;
+    }
+
     /* オブジェクトの設定値 */
     public void PaintDataSetParam(int c1,int c2,int c3,int c4, int sc, int st, int ty) {
         color1 = c1;
@@ -120,11 +125,19 @@ public class PaintData extends PaintParts {
         }
 
         /* 画面範囲外 */
-        if (x < -10 )               isAlive = false;
-        if (x > screen_x + 10)      isAlive = false;
+        if (x < -10 ){
+            isAlive = false;    hitpoint = 0;
+        }
+        if (x > screen_x + 10){
+            isAlive = false;    hitpoint = 0;
+        }
 //        if (y < -10)                isAlive = false;
-        if (y < 100)                isAlive = false;
-        if (y > screen_y + 10)      isAlive = false;
+        if (y < 100){
+            isAlive = false;    hitpoint = 0;
+        }
+        if (y > screen_y + 10){
+            isAlive = false;    hitpoint = 0;
+        }
 
     }
 
@@ -206,9 +219,22 @@ public class PaintData extends PaintParts {
 
             //  星型
             case STAR:
-                scale = 60;
                 Path path = new Path();
-                paint.setColor(Color.argb(color1, color2, color3, color4));
+                if(isAlive == true) {
+                    if (color1 < 150)   color1 = 170;
+                    paint.setColor(Color.argb(color1, color2, color3, color4));
+                }
+                else{
+                    if ((hitpoint % 2) ==0) {
+                        paint.setColor(Color.argb(255, 240, 240, 0));
+                    }
+                    else if((hitpoint % 2) ==0){
+                        paint.setColor(Color.argb(200, 200, 200, 0));
+                    }
+                    else {
+                        paint.setColor(Color.argb(160, 160, 160, 0));
+                    }
+                }
                 paint.setStyle(Paint.Style.FILL_AND_STROKE);
                 path.reset();
                 float theta = (float)(Math.PI * 72 / 180);

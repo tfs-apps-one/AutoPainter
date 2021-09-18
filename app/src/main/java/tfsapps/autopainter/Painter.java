@@ -20,91 +20,165 @@ import androidx.annotation.NonNull;
 
 public class Painter extends SurfaceView implements SurfaceHolder.Callback {
     Paint paint;
-    Paint line_1;           //１行目テキスト
-    Paint line_2;           //２行目テキスト
-    Paint line_3;           //３行目テキスト
-    Paint line_4;           //４行目テキスト
-    private long time_count;
-    private int game_stage = 1;
-    private int draw_num = 0;
-    private int star_num = 0;
-    boolean drawing = true;
+    Paint line_1;               //１行目テキスト
+    Paint line_2;               //２行目テキスト
+    Paint line_3;               //３行目テキスト
+    Paint line_4;               //４行目テキスト
+    private long time_count;    //ゲームタイマー
+    private int game_level = 1; //ステージ（難易度レベル）
+    private int star_num = 0;   //現在の星★の数
     private static final long FPS = 60;
+
     private final Random rand = new Random(System.currentTimeMillis());
+
+    /* 生成した図形のキュー */
     private final List<PaintData> paintList = new ArrayList<PaintData>();
 
+    private int game_status = 0;            //ゲームステータス管理
     private final int GAME_INITIAL = 0;     //ステージ初期状態
     private final int GAME_OPEING = 1;      //ステージの表示　中央に大きく
     private final int GAME_SETTING = 2;     //ゲーム準備中
     private final int GAME_PLAYING = 3;     //ゲームプレイ中
     private final int GAME_ENDING = 4;      //ゲーム終了中
 
-    private int game_status = 0;
+    private int game_app_rate_obj;          //図形生成の出現率
+    private int game_app_rate_star;         //星　生成の出現率
+    private int game_scale;                 //図形の大きさ
 
     public Painter(Context context) {
         super(context);
         getHolder().addCallback(this);
-
         line_1 = new Paint();
         line_2 = new Paint();
         line_3 = new Paint();
         line_4 = new Paint();
     }
 
-    public void StartDrawing(){
-        drawing = true;
-    }
-    public void StopDrawing(){
-        drawing = false;
+    /* ゲームバランス調整 */
+    public void setGameBalance() {
+        switch (game_level){
+            case 1: //レベル１  初級
+                game_app_rate_obj = 30;
+                game_app_rate_star = 10;
+                game_scale = getWidth()/8;
+                break;
+            case 2: //レベル２
+                game_app_rate_obj = 30;
+                game_app_rate_star = 10;
+                game_scale = getWidth()/12;
+                break;
+
+            case 3: //レベル３
+                game_app_rate_obj = 20;
+                game_app_rate_star = 10;
+                game_scale = getWidth()/15;
+                break;
+
+            case 4: //レベル４  中級
+                game_app_rate_obj = 10;
+                game_app_rate_star = 10;
+                game_scale = getWidth()/20;
+                break;
+
+            case 5: //レベル５
+                game_app_rate_obj = 5;
+                game_app_rate_star = 10;
+                game_scale = getWidth()/20;
+                break;
+
+            case 6: //レベル６
+                game_app_rate_obj = 5;
+                game_app_rate_star = 10;
+                game_scale = getWidth()/20;
+                break;
+
+            case 7: //レベル７  上級
+                game_app_rate_obj = 3;
+                game_app_rate_star = 5;
+                game_scale = getWidth()/30;
+                break;
+
+            case 8: //レベル８
+                game_app_rate_obj = 2;
+                game_app_rate_star = 4;
+                game_scale = getWidth()/30;
+                break;
+
+            case 9: //レベル９
+                game_app_rate_obj = 1;
+                game_app_rate_star = 3;
+                game_scale = getWidth()/30;
+                break;
+
+            case 10: //レベル１０ 神級
+                game_app_rate_obj = 1;
+                game_app_rate_star = 2;
+                game_scale = getWidth()/30;
+                break;
+
+            default:
+                game_app_rate_obj = 10;
+                game_app_rate_star = 30;
+                game_scale = getWidth()/30;
+                break;
+        }
     }
 
     /********************************************************************************
      図形生成の処理
      *********************************************************************************/
-    public void createObject(Canvas canvas, long timer){
+    public void createObject(Canvas canvas){
         float xc = getWidth();
         float yc = getHeight();
         int type;
         int i;
 
-        //test  出現率調整　ゲームバランス
-/*        int rate = 10;
-        rate = rate - game_stage;
-        if ((timer%rate) != 0){
-            return;
-        }
-*/
-        /* 図形の出現率 */
-        while (true) {
-            type = rand.nextInt(1000);
-            type = type % 7;
-            if (type == 6){ //星型だけ確率を下げる
-                if ((timer%5) == 0){
-                    break;
-                }
-            }
-            else{
-                break;
-            }
-        }
-        paint = new Paint();
 
+        /* ゲームバランス調整 */
+        setGameBalance();
+
+        /* 図形の出現率 */
+        type = rand.nextInt(1000);
+        type = type % 7;
+
+        if (type > 0 && type <= 5){
+            if((time_count % game_app_rate_obj) != 0){
+                return;
+            }
+        }
+        if (type == 6){
+            if((time_count % game_app_rate_star) != 0){
+                return;
+            }
+        }
+
+        paint = new Paint();
+        /* オブジェクトの座標位置（X、Y） */
         float x = rand.nextInt((int) xc);
         float y = rand.nextInt((int) yc);
 
+        /* オブジェクトの色指定 */
         int color_1 = rand.nextInt(255);
         int color_2 = rand.nextInt(255);
         int color_3 = rand.nextInt(255);
         int color_4 = rand.nextInt(255);
+
         int dp = rand.nextInt(3);
-//        int stroke = rand.nextInt(8);
+
+        /* 線の太さ */
         int stroke = rand.nextInt(15);
         if (stroke <=5) stroke=5;
-        int scale = rand.nextInt((int)xc/30);
-//        int scale = rand.nextInt((int)xc/3);
+
+        /* 図形の大きさ */
+        int scale = rand.nextInt(game_scale);
+
+        if (type == 6 && scale < 60){
+            scale = 60;
+        }
 
         PaintData paintData = new PaintData(paint,xc,yc,x,y,dp);
         paintData.PaintDataSetParam(color_1,color_2,color_3,color_4,scale,stroke,type);
+
         paintList.add(paintData);
     }
 
@@ -115,7 +189,7 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
 
         String buff = "";
         String level = "★";
-        for(int i=0; i<game_stage; i++){
+        for(int i=0; i<game_level; i++){
             buff += level;
         }
 
@@ -128,19 +202,25 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
                 line_1.setTextSize(45);
                 line_1.setTypeface(Typeface.DEFAULT_BOLD);
                 line_1.setAntiAlias(true);
-                canvas.drawText("ほし★をタッチしてゼロ個にしよう！！", 50, 60, line_1);
+                canvas.drawText("星★を見つけてタッチしよう！！", 50, 60, line_1);
 
-                line_2.setColor(Color.RED);
-                line_2.setTextSize(70);
+                line_2.setColor(Color.BLUE);
+                line_2.setTextSize(45);
                 line_2.setTypeface(Typeface.DEFAULT_BOLD);
                 line_2.setAntiAlias(true);
-                canvas.drawText("レベル: " + buff, 50, 150, line_2);
+                canvas.drawText("すべて見つけて０個にしよう！！", 50, 120, line_2);
 
-                line_3.setColor(Color.BLACK);
-                line_3.setTextSize(70);
+                line_3.setColor(Color.RED);
+                line_3.setTextSize(60);
                 line_3.setTypeface(Typeface.DEFAULT_BOLD);
                 line_3.setAntiAlias(true);
-                canvas.drawText("　・・・準備中・・・", 50, 300, line_3);
+                canvas.drawText("レベル: " + buff, 50, 250, line_3);
+
+                line_4.setColor(Color.BLACK);
+                line_4.setTextSize(80);
+                line_4.setTypeface(Typeface.DEFAULT_BOLD);
+                line_4.setAntiAlias(true);
+                canvas.drawText("　ゲームスタート", 50, 400, line_4);
                 break;
 
             case GAME_SETTING:
@@ -148,19 +228,25 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
                 line_1.setTextSize(45);
                 line_1.setTypeface(Typeface.DEFAULT_BOLD);
                 line_1.setAntiAlias(true);
-                canvas.drawText("ほし★をタッチしてゼロ個にしよう！！", 50, 60, line_1);
+                canvas.drawText("星★を見つけてタッチしよう！！", 50, 60, line_1);
 
-                line_2.setColor(Color.RED);
-                line_2.setTextSize(70);
+                line_2.setColor(Color.BLUE);
+                line_2.setTextSize(45);
                 line_2.setTypeface(Typeface.DEFAULT_BOLD);
                 line_2.setAntiAlias(true);
-                canvas.drawText("レベル: " + buff, 50, 150, line_2);
+                canvas.drawText("すべて見つけて０個にしよう！！", 50, 120, line_2);
 
-                line_3.setColor(Color.BLACK);
-                line_3.setTextSize(70);
+                line_3.setColor(Color.RED);
+                line_3.setTextSize(60);
                 line_3.setTypeface(Typeface.DEFAULT_BOLD);
                 line_3.setAntiAlias(true);
-                canvas.drawText("　・・・ゲームスタート・・・", 50, 300, line_3);
+                canvas.drawText("レベル: " + buff, 50, 250, line_3);
+
+                line_4.setColor(Color.BLACK);
+                line_4.setTextSize(80);
+                line_4.setTypeface(Typeface.DEFAULT_BOLD);
+                line_4.setAntiAlias(true);
+                canvas.drawText("　準備中...", 50, 400, line_4);
                 break;
 
             case GAME_PLAYING:
@@ -168,7 +254,13 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
                 line_1.setTextSize(50);
                 line_1.setTypeface(Typeface.DEFAULT_BOLD);
                 line_1.setAntiAlias(true);
-                canvas.drawText("レベル:" + buff + "　残り:" + star_num + "個", 50, 70, line_1);
+                canvas.drawText("レベル:" + buff, 50, 70, line_1);
+
+                line_2.setColor(Color.RED);
+                line_2.setTextSize(50);
+                line_2.setTypeface(Typeface.DEFAULT_BOLD);
+                line_2.setAntiAlias(true);
+                canvas.drawText("見つける星 残り:" + star_num + "個", 50, 140, line_1);
                 break;
 
             case GAME_ENDING:
@@ -179,10 +271,10 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
                 canvas.drawText("おめでとう！！", 50, 100, line_1);
 
                 line_2.setColor(Color.BLACK);
-                line_2.setTextSize(70);
+                line_2.setTextSize(80);
                 line_2.setTypeface(Typeface.DEFAULT_BOLD);
                 line_2.setAntiAlias(true);
-                canvas.drawText("☆ ステージ クリア ★", 50, 300, line_2);
+                canvas.drawText("☆ ステージ クリア ★", 50, 400, line_2);
                 break;
 
         }
@@ -207,13 +299,13 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
                 return;     //  ★リターン
 
             case GAME_OPEING:
-                if (time_count > 70){
+                if (time_count > 50){
                     game_status = GAME_SETTING;
                 }
                 return;     //  ★リターン
 
             case GAME_SETTING:
-                if (time_count > 120){
+                if (time_count > 100 && star_num >= 3){
                     game_status = GAME_PLAYING;
                 }
                 break;
@@ -234,7 +326,7 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
 
                 if ((time_count % 100) == 0){
                     game_status = GAME_OPEING;
-                    game_stage++;
+                    game_level++;
                     time_count = 0;
                 }
                 return;     //  ★リターン
@@ -248,7 +340,7 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
         star_num = 0;
 
         /* 図形の生成 */
-        createObject(canvas, time_count);
+        createObject(canvas);
 
         /* 図形の表示 */
         for (int i = 0; i < paintList.size(); i++) {
@@ -278,10 +370,15 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
         for (int i = 0; i < paintList.size(); i++) {
             PaintData object = paintList.get(i);
             if (object.isObjAlive() == false){
-                paintList.remove(object);
+                if(object.isObjHitPoint() == 0) {
+                    paintList.remove(object);
+                }
+                else{
+                    paintList.get(i).hitpoint--;
+                }
             }
             else {
-                if (object.isStar() == true){
+                if (object.isStar() == true && object.isObjAlive() == true){
                     star_num++;
                 }
             }
