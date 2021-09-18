@@ -20,8 +20,10 @@ import androidx.annotation.NonNull;
 
 public class Painter extends SurfaceView implements SurfaceHolder.Callback {
     Paint paint;
-    Paint title;
-    Paint score;
+    Paint line_1;           //１行目テキスト
+    Paint line_2;           //２行目テキスト
+    Paint line_3;           //３行目テキスト
+    Paint line_4;           //４行目テキスト
     private long time_count;
     private int game_stage = 1;
     private int draw_num = 0;
@@ -31,6 +33,7 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
     private final Random rand = new Random(System.currentTimeMillis());
     private final List<PaintData> paintList = new ArrayList<PaintData>();
 
+    private final int GAME_INITIAL = 0;     //ステージ初期状態
     private final int GAME_OPEING = 1;      //ステージの表示　中央に大きく
     private final int GAME_SETTING = 2;     //ゲーム準備中
     private final int GAME_PLAYING = 3;     //ゲームプレイ中
@@ -42,10 +45,10 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
         super(context);
         getHolder().addCallback(this);
 
-        /* スコア表示（図形の数）の生成 */
-        title = new Paint();
-        /* スコア表示（図形の数）の生成 */
-        score = new Paint();
+        line_1 = new Paint();
+        line_2 = new Paint();
+        line_3 = new Paint();
+        line_4 = new Paint();
     }
 
     public void StartDrawing(){
@@ -106,70 +109,146 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     /********************************************************************************
+     描画処理
+     *********************************************************************************/
+    protected void drawTextLine(Canvas canvas) {
+
+        String buff = "";
+        String level = "★";
+        for(int i=0; i<game_stage; i++){
+            buff += level;
+        }
+
+        switch (game_status){
+            case GAME_INITIAL:
+                break;
+
+            case GAME_OPEING:
+                line_1.setColor(Color.BLUE);
+                line_1.setTextSize(45);
+                line_1.setTypeface(Typeface.DEFAULT_BOLD);
+                line_1.setAntiAlias(true);
+                canvas.drawText("ほし★をタッチしてゼロ個にしよう！！", 50, 60, line_1);
+
+                line_2.setColor(Color.RED);
+                line_2.setTextSize(70);
+                line_2.setTypeface(Typeface.DEFAULT_BOLD);
+                line_2.setAntiAlias(true);
+                canvas.drawText("レベル: " + buff, 50, 150, line_2);
+
+                line_3.setColor(Color.BLACK);
+                line_3.setTextSize(70);
+                line_3.setTypeface(Typeface.DEFAULT_BOLD);
+                line_3.setAntiAlias(true);
+                canvas.drawText("　・・・準備中・・・", 50, 300, line_3);
+                break;
+
+            case GAME_SETTING:
+                line_1.setColor(Color.BLUE);
+                line_1.setTextSize(45);
+                line_1.setTypeface(Typeface.DEFAULT_BOLD);
+                line_1.setAntiAlias(true);
+                canvas.drawText("ほし★をタッチしてゼロ個にしよう！！", 50, 60, line_1);
+
+                line_2.setColor(Color.RED);
+                line_2.setTextSize(70);
+                line_2.setTypeface(Typeface.DEFAULT_BOLD);
+                line_2.setAntiAlias(true);
+                canvas.drawText("レベル: " + buff, 50, 150, line_2);
+
+                line_3.setColor(Color.BLACK);
+                line_3.setTextSize(70);
+                line_3.setTypeface(Typeface.DEFAULT_BOLD);
+                line_3.setAntiAlias(true);
+                canvas.drawText("　・・・ゲームスタート・・・", 50, 300, line_3);
+                break;
+
+            case GAME_PLAYING:
+                line_1.setColor(Color.RED);
+                line_1.setTextSize(50);
+                line_1.setTypeface(Typeface.DEFAULT_BOLD);
+                line_1.setAntiAlias(true);
+                canvas.drawText("レベル:" + buff + "　残り:" + star_num + "個", 50, 70, line_1);
+                break;
+
+            case GAME_ENDING:
+                line_1.setColor(Color.BLUE);
+                line_1.setTextSize(70);
+                line_1.setTypeface(Typeface.DEFAULT_BOLD);
+                line_1.setAntiAlias(true);
+                canvas.drawText("おめでとう！！", 50, 100, line_1);
+
+                line_2.setColor(Color.BLACK);
+                line_2.setTextSize(70);
+                line_2.setTypeface(Typeface.DEFAULT_BOLD);
+                line_2.setAntiAlias(true);
+                canvas.drawText("☆ ステージ クリア ★", 50, 300, line_2);
+                break;
+
+        }
+
+    }
+
+    /********************************************************************************
         描画処理
     *********************************************************************************/
-    protected void drawObject(Canvas canvas,long timer) {
+    protected void drawObject(Canvas canvas) {
 
         /* 背景 */
         canvas.drawColor(Color.argb(220, 255, 255, 255));   //白で影あり
 //        canvas.drawColor(Color.argb(255, 255, 255, 255)); //白で影なし
 
-        /* アプリ起動直後 */
-        if (game_status == 0)   game_status = GAME_OPEING;
+        /* テキスト表示 */
+        drawTextLine(canvas);
 
-        /* ゲームエンディング */
-        if (game_status == GAME_ENDING){
-            title.setColor(Color.BLACK);
-            title.setTextSize(70);
-            title.setTypeface(Typeface.DEFAULT_BOLD);
-            title.setAntiAlias(true);
-            canvas.drawText("☆★ ステージ:" + game_stage + " クリア ★☆", 50, 150, title);
-
-            /* オブジェクト全て消去 */
-            for (int i = 0; i < paintList.size(); i++) {
-                PaintData object = paintList.get(i);
-                paintList.remove(object);
-            }
-
-            if ((timer % 100) == 0){
+        switch (game_status){
+            case GAME_INITIAL:
                 game_status = GAME_OPEING;
-                game_stage++;
-                time_count = 0;
-            }
-            return;
+                return;     //  ★リターン
+
+            case GAME_OPEING:
+                if (time_count > 70){
+                    game_status = GAME_SETTING;
+                }
+                return;     //  ★リターン
+
+            case GAME_SETTING:
+                if (time_count > 120){
+                    game_status = GAME_PLAYING;
+                }
+                break;
+
+            case GAME_PLAYING:
+                /* 星がゼロ個になった場合 */
+                if (star_num <= 0){
+                    game_status = GAME_ENDING;
+                }
+                break;
+
+            case GAME_ENDING:
+                /* オブジェクト全て消去 */
+                for (int i = 0; i < paintList.size(); i++) {
+                    PaintData object = paintList.get(i);
+                    paintList.remove(object);
+                }
+
+                if ((time_count % 100) == 0){
+                    game_status = GAME_OPEING;
+                    game_stage++;
+                    time_count = 0;
+                }
+                return;     //  ★リターン
         }
 
+    /*******************************
+     　以下、図形の表示・削除処理
+     ******************************/
 
-        /* ゲームオープニング */
-        if (game_status == GAME_OPEING){
-            title.setColor(Color.BLACK);
-            title.setTextSize(70);
-            title.setTypeface(Typeface.DEFAULT_BOLD);
-            title.setAntiAlias(true);
-            canvas.drawText("ステージ: " + game_stage + " 準備中...", 50, 150, title);
-
-            if (timer > 70){
-                game_status = GAME_SETTING;
-            }
-            return;
-        }
-        /* ゲーム準備中 */
-        if (game_status == GAME_SETTING){
-            title.setColor(Color.BLACK);
-            title.setTextSize(70);
-            title.setTypeface(Typeface.DEFAULT_BOLD);
-            title.setAntiAlias(true);
-            canvas.drawText("ステージ: " + game_stage + " スタート！", 50, 150, title);
-
-            if (timer > 120){
-                game_status = GAME_PLAYING;
-            }
-        }
-
+        /* 星★の数 */
         star_num = 0;
 
         /* 図形の生成 */
-        createObject(canvas, timer);
+        createObject(canvas, time_count);
 
         /* 図形の表示 */
         for (int i = 0; i < paintList.size(); i++) {
@@ -182,7 +261,7 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
             boolean scale_flag;                        //  大きさ変更フラグ（時間間隔によって決まる）
 
             /* 大きさを変更する間隔 */
-            if ((timer%60) == 0){
+            if ((time_count%60) == 0){
                 scale_flag = true;
             }
             else{
@@ -205,27 +284,6 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
                 if (object.isStar() == true){
                     star_num++;
                 }
-            }
-        }
-
-
-        /* スコアの表示 */
-        if (game_status == GAME_PLAYING) {
-            title.setColor(Color.BLUE);
-            title.setTextSize(45);
-            title.setTypeface(Typeface.DEFAULT_BOLD);
-            title.setAntiAlias(true);
-            canvas.drawText("ほし★をタッチしてゼロ個にしよう！！", 50, 50, title);
-
-            score.setColor(Color.RED);
-            score.setTextSize(60);
-            score.setTypeface(Typeface.DEFAULT_BOLD);
-            score.setAntiAlias(true);
-            canvas.drawText("ステージ:" + game_stage + "　★ 残り:" + star_num + "個", 50, 120, score);
-
-            /* 星がゼロ個になった場合 */
-            if (star_num <= 0){
-                game_status = GAME_ENDING;
             }
         }
     }
@@ -266,7 +324,7 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
             while (!isFinished) {
                 Canvas canvas = holder.lockCanvas();
                 if (canvas != null) {
-                    drawObject(canvas,time_count);
+                    drawObject(canvas);
                     holder.unlockCanvasAndPost(canvas);
                 }
 
