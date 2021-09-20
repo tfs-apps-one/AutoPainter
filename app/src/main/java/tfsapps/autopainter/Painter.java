@@ -38,8 +38,9 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
     private final int GAME_INITIAL = 0;     //ステージ初期状態
     private final int GAME_OPEING = 1;      //ステージの表示　中央に大きく
     private final int GAME_SETTING = 2;     //ゲーム準備中
-    private final int GAME_PLAYING = 3;     //ゲームプレイ中
-    private final int GAME_ENDING = 4;      //ゲーム終了中
+    private final int GAME_SETEND = 3;     //ゲームプレイ中
+    private final int GAME_PLAYING = 4;     //ゲームプレイ中
+    private final int GAME_ENDING = 5;      //ゲーム終了中
 
     private int game_app_rate_obj;          //図形生成の出現率
     private int game_app_rate_star;         //星　生成の出現率
@@ -58,49 +59,49 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
     public void setGameBalance() {
         switch (game_level){
             case 1: //レベル１  初級
-                game_app_rate_obj = 30;
+                game_app_rate_obj = 10;
                 game_app_rate_star = 10;
-                game_scale = getWidth()/8;
+                game_scale = getWidth()/10;
                 break;
             case 2: //レベル２
-                game_app_rate_obj = 30;
-                game_app_rate_star = 10;
+                game_app_rate_obj = 3;
+                game_app_rate_star = 5;
                 game_scale = getWidth()/12;
                 break;
 
             case 3: //レベル３
-                game_app_rate_obj = 20;
-                game_app_rate_star = 10;
+                game_app_rate_obj = 3;
+                game_app_rate_star = 5;
                 game_scale = getWidth()/15;
                 break;
 
             case 4: //レベル４  中級
-                game_app_rate_obj = 10;
-                game_app_rate_star = 10;
-                game_scale = getWidth()/20;
+                game_app_rate_obj = 2;
+                game_app_rate_star = 4;
+                game_scale = getWidth()/15;
                 break;
 
             case 5: //レベル５
-                game_app_rate_obj = 5;
-                game_app_rate_star = 10;
-                game_scale = getWidth()/20;
+                game_app_rate_obj = 2;
+                game_app_rate_star = 4;
+                game_scale = getWidth()/15;
                 break;
 
             case 6: //レベル６
-                game_app_rate_obj = 5;
-                game_app_rate_star = 10;
+                game_app_rate_obj = 2;
+                game_app_rate_star = 4;
                 game_scale = getWidth()/20;
                 break;
 
             case 7: //レベル７  上級
-                game_app_rate_obj = 3;
-                game_app_rate_star = 5;
-                game_scale = getWidth()/30;
+                game_app_rate_obj = 1;
+                game_app_rate_star = 3;
+                game_scale = getWidth()/20;
                 break;
 
             case 8: //レベル８
-                game_app_rate_obj = 2;
-                game_app_rate_star = 4;
+                game_app_rate_obj = 1;
+                game_app_rate_star = 3;
                 game_scale = getWidth()/30;
                 break;
 
@@ -117,10 +118,15 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
                 break;
 
             default:
-                game_app_rate_obj = 10;
-                game_app_rate_star = 30;
+                game_app_rate_obj = 1;
+                game_app_rate_star = 1;
                 game_scale = getWidth()/30;
                 break;
+        }
+
+        /* 準備中の時は、星★の出現率を高める */
+        if (game_status == GAME_SETTING) {
+            game_app_rate_star = 2;
         }
     }
 
@@ -141,13 +147,13 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
         type = rand.nextInt(1000);
         type = type % 7;
 
-        if (type > 0 && type <= 5){
-            if((time_count % game_app_rate_obj) != 0){
+        if (type > 0 && type <= 5) {
+            if ((time_count % game_app_rate_obj) != 0) {
                 return;
             }
         }
-        if (type == 6){
-            if((time_count % game_app_rate_star) != 0){
+        if (type == 6) {
+            if ((time_count % game_app_rate_star) != 0) {
                 return;
             }
         }
@@ -155,7 +161,16 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
         paint = new Paint();
         /* オブジェクトの座標位置（X、Y） */
         float x = rand.nextInt((int) xc);
-        float y = rand.nextInt((int) yc);
+        float y;
+        while(true){
+             y = rand.nextInt((int) yc);
+             if (y <= 150 || y >= (getHeight()-150)){
+                 continue;
+             }
+             else{
+                 break;
+            }
+        }
 
         /* オブジェクトの色指定 */
         int color_1 = rand.nextInt(255);
@@ -188,8 +203,22 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
     protected void drawTextLine(Canvas canvas) {
 
         String buff = "";
+        int _index = game_level;
+        if (game_level <= 3){
+            buff += "初級 ";
+        }else if(game_level <= 6){
+            buff += "中級 ";
+            _index -= 3;
+        }else if(game_level <= 9){
+            buff += "上級 ";
+            _index -= 6;
+        }else {
+            buff += "神級 ";
+            _index -= 9;
+        }
+
         String level = "★";
-        for(int i=0; i<game_level; i++){
+        for(int i=0; i<_index; i++){
             buff += level;
         }
 
@@ -220,7 +249,7 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
                 line_4.setTextSize(80);
                 line_4.setTypeface(Typeface.DEFAULT_BOLD);
                 line_4.setAntiAlias(true);
-                canvas.drawText("　ゲームスタート", 50, 400, line_4);
+                canvas.drawText("　ゲームを始めます", 50, 400, line_4);
                 break;
 
             case GAME_SETTING:
@@ -247,6 +276,26 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
                 line_4.setTypeface(Typeface.DEFAULT_BOLD);
                 line_4.setAntiAlias(true);
                 canvas.drawText("　準備中...", 50, 400, line_4);
+                break;
+
+            case GAME_SETEND:
+                line_1.setColor(Color.RED);
+                line_1.setTextSize(50);
+                line_1.setTypeface(Typeface.DEFAULT_BOLD);
+                line_1.setAntiAlias(true);
+                canvas.drawText("レベル:" + buff, 50, 70, line_1);
+
+                line_2.setColor(Color.RED);
+                line_2.setTextSize(50);
+                line_2.setTypeface(Typeface.DEFAULT_BOLD);
+                line_2.setAntiAlias(true);
+                canvas.drawText("見つける星 残り:" + star_num + "個", 50, 140, line_1);
+
+                line_3.setColor(Color.BLACK);
+                line_3.setTextSize(80);
+                line_3.setTypeface(Typeface.DEFAULT_BOLD);
+                line_3.setAntiAlias(true);
+                canvas.drawText("　～スタート～ ", 50, 400, line_3);
                 break;
 
             case GAME_PLAYING:
@@ -294,29 +343,37 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
         drawTextLine(canvas);
 
         switch (game_status){
+            /* 初期状態 */
             case GAME_INITIAL:
                 game_status = GAME_OPEING;
                 return;     //  ★リターン
-
+            /* オープニング　・・・ゲームスタート・・・ */
             case GAME_OPEING:
                 if (time_count > 50){
                     game_status = GAME_SETTING;
                 }
                 return;     //  ★リターン
-
+            /* ・・・準備中・・・ */
             case GAME_SETTING:
                 if (time_count > 100 && star_num >= 3){
+                    game_status = GAME_SETEND;
+                    time_count = 200;
+                }
+                break;
+            /*　・・・準備完了・・・ */
+            case GAME_SETEND:
+                if (time_count > 230){
                     game_status = GAME_PLAYING;
                 }
                 break;
-
+            /* ゲーム中 */
             case GAME_PLAYING:
                 /* 星がゼロ個になった場合 */
                 if (star_num <= 0){
                     game_status = GAME_ENDING;
                 }
                 break;
-
+            /* ステージクリア */
             case GAME_ENDING:
                 /* オブジェクト全て消去 */
                 for (int i = 0; i < paintList.size(); i++) {
