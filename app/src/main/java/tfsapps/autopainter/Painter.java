@@ -237,7 +237,7 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
                 line_2.setTextSize(45);
                 line_2.setTypeface(Typeface.DEFAULT_BOLD);
                 line_2.setAntiAlias(true);
-                canvas.drawText("すべて見つけて０個にしよう！！", 50, 120, line_2);
+                canvas.drawText("全てタッチでステージクリア！！", 50, 120, line_2);
 
                 line_3.setColor(Color.RED);
                 line_3.setTextSize(60);
@@ -263,7 +263,7 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
                 line_2.setTextSize(45);
                 line_2.setTypeface(Typeface.DEFAULT_BOLD);
                 line_2.setAntiAlias(true);
-                canvas.drawText("すべて見つけて０個にしよう！！", 50, 120, line_2);
+                canvas.drawText("全てタッチでステージクリア！！", 50, 120, line_2);
 
                 line_3.setColor(Color.RED);
                 line_3.setTextSize(60);
@@ -323,7 +323,20 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
                 line_2.setTextSize(80);
                 line_2.setTypeface(Typeface.DEFAULT_BOLD);
                 line_2.setAntiAlias(true);
-                canvas.drawText("☆ ステージ クリア ★", 50, 400, line_2);
+                canvas.drawText("☆☆☆☆☆☆☆☆☆☆", 50, 310, line_3);
+
+                line_3.setColor(Color.BLACK);
+                line_3.setTextSize(80);
+                line_3.setTypeface(Typeface.DEFAULT_BOLD);
+                line_3.setAntiAlias(true);
+                canvas.drawText("　ステージ　クリア　", 50, 400, line_3);
+
+                line_4.setColor(Color.BLACK);
+                line_4.setTextSize(80);
+                line_4.setTypeface(Typeface.DEFAULT_BOLD);
+                line_4.setAntiAlias(true);
+                canvas.drawText("★★★★★★★★★★", 50, 490, line_4);
+
                 break;
 
         }
@@ -371,6 +384,7 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
                 /* 星がゼロ個になった場合 */
                 if (star_num <= 0){
                     game_status = GAME_ENDING;
+                    time_count = 0;
                 }
                 break;
             /* ステージクリア */
@@ -381,7 +395,7 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
                     paintList.remove(object);
                 }
 
-                if ((time_count % 100) == 0){
+                if (time_count > 70){
                     game_status = GAME_OPEING;
                     game_level++;
                     time_count = 0;
