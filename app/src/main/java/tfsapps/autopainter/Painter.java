@@ -201,6 +201,10 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
      描画処理
      *********************************************************************************/
     protected void drawTextLine(Canvas canvas) {
+        float xc = getWidth();
+        int font1 = (int)xc*4/100;
+        int font2 = (int)xc*5/100;
+        int font3 = (int)xc*7/100;
 
         String buff = "";
         int _index = game_level;
@@ -228,25 +232,25 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
 
             case GAME_OPEING:
                 line_1.setColor(Color.BLUE);
-                line_1.setTextSize(45);
+                line_1.setTextSize(font1);
                 line_1.setTypeface(Typeface.DEFAULT_BOLD);
                 line_1.setAntiAlias(true);
                 canvas.drawText("星★を見つけてタッチしよう！！", 50, 60, line_1);
 
                 line_2.setColor(Color.BLUE);
-                line_2.setTextSize(45);
+                line_2.setTextSize(font1);
                 line_2.setTypeface(Typeface.DEFAULT_BOLD);
                 line_2.setAntiAlias(true);
                 canvas.drawText("全てタッチでステージクリア！！", 50, 120, line_2);
 
                 line_3.setColor(Color.RED);
-                line_3.setTextSize(60);
+                line_3.setTextSize(font2);
                 line_3.setTypeface(Typeface.DEFAULT_BOLD);
                 line_3.setAntiAlias(true);
                 canvas.drawText("レベル: " + buff, 50, 250, line_3);
 
                 line_4.setColor(Color.BLACK);
-                line_4.setTextSize(80);
+                line_4.setTextSize(font3);
                 line_4.setTypeface(Typeface.DEFAULT_BOLD);
                 line_4.setAntiAlias(true);
                 canvas.drawText("　ゲームを始めます", 50, 400, line_4);
@@ -254,25 +258,25 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
 
             case GAME_SETTING:
                 line_1.setColor(Color.BLUE);
-                line_1.setTextSize(45);
+                line_1.setTextSize(font1);
                 line_1.setTypeface(Typeface.DEFAULT_BOLD);
                 line_1.setAntiAlias(true);
                 canvas.drawText("星★を見つけてタッチしよう！！", 50, 60, line_1);
 
                 line_2.setColor(Color.BLUE);
-                line_2.setTextSize(45);
+                line_2.setTextSize(font1);
                 line_2.setTypeface(Typeface.DEFAULT_BOLD);
                 line_2.setAntiAlias(true);
                 canvas.drawText("全てタッチでステージクリア！！", 50, 120, line_2);
 
                 line_3.setColor(Color.RED);
-                line_3.setTextSize(60);
+                line_3.setTextSize(font2);
                 line_3.setTypeface(Typeface.DEFAULT_BOLD);
                 line_3.setAntiAlias(true);
                 canvas.drawText("レベル: " + buff, 50, 250, line_3);
 
                 line_4.setColor(Color.BLACK);
-                line_4.setTextSize(80);
+                line_4.setTextSize(font3);
                 line_4.setTypeface(Typeface.DEFAULT_BOLD);
                 line_4.setAntiAlias(true);
                 canvas.drawText("　準備中...", 50, 400, line_4);
@@ -280,19 +284,19 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
 
             case GAME_SETEND:
                 line_1.setColor(Color.RED);
-                line_1.setTextSize(50);
+                line_1.setTextSize(font1);
                 line_1.setTypeface(Typeface.DEFAULT_BOLD);
                 line_1.setAntiAlias(true);
                 canvas.drawText("レベル:" + buff, 50, 70, line_1);
 
                 line_2.setColor(Color.RED);
-                line_2.setTextSize(50);
+                line_2.setTextSize(font1);
                 line_2.setTypeface(Typeface.DEFAULT_BOLD);
                 line_2.setAntiAlias(true);
                 canvas.drawText("見つける星 残り:" + star_num + "個", 50, 140, line_1);
 
                 line_3.setColor(Color.BLACK);
-                line_3.setTextSize(80);
+                line_3.setTextSize(font3);
                 line_3.setTypeface(Typeface.DEFAULT_BOLD);
                 line_3.setAntiAlias(true);
                 canvas.drawText("　～スタート～ ", 50, 400, line_3);
@@ -300,13 +304,13 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
 
             case GAME_PLAYING:
                 line_1.setColor(Color.RED);
-                line_1.setTextSize(50);
+                line_1.setTextSize(font1);
                 line_1.setTypeface(Typeface.DEFAULT_BOLD);
                 line_1.setAntiAlias(true);
                 canvas.drawText("レベル:" + buff, 50, 70, line_1);
 
                 line_2.setColor(Color.RED);
-                line_2.setTextSize(50);
+                line_2.setTextSize(font1);
                 line_2.setTypeface(Typeface.DEFAULT_BOLD);
                 line_2.setAntiAlias(true);
                 canvas.drawText("見つける星 残り:" + star_num + "個", 50, 140, line_1);
@@ -314,25 +318,25 @@ public class Painter extends SurfaceView implements SurfaceHolder.Callback {
 
             case GAME_ENDING:
                 line_1.setColor(Color.BLUE);
-                line_1.setTextSize(70);
+                line_1.setTextSize(font2);
                 line_1.setTypeface(Typeface.DEFAULT_BOLD);
                 line_1.setAntiAlias(true);
                 canvas.drawText("おめでとう！！", 50, 100, line_1);
 
                 line_2.setColor(Color.BLACK);
-                line_2.setTextSize(80);
+                line_2.setTextSize(font3);
                 line_2.setTypeface(Typeface.DEFAULT_BOLD);
                 line_2.setAntiAlias(true);
                 canvas.drawText("☆☆☆☆☆☆☆☆☆☆", 50, 310, line_3);
 
                 line_3.setColor(Color.BLACK);
-                line_3.setTextSize(80);
+                line_3.setTextSize(font3);
                 line_3.setTypeface(Typeface.DEFAULT_BOLD);
                 line_3.setAntiAlias(true);
                 canvas.drawText("　ステージ　クリア　", 50, 400, line_3);
 
                 line_4.setColor(Color.BLACK);
-                line_4.setTextSize(80);
+                line_4.setTextSize(font3);
                 line_4.setTypeface(Typeface.DEFAULT_BOLD);
                 line_4.setAntiAlias(true);
                 canvas.drawText("★★★★★★★★★★", 50, 490, line_4);
